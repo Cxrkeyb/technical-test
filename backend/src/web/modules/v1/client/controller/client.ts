@@ -130,7 +130,8 @@ const getClientesPaginacion = async (req: Request, res: Response): Promise<void>
     const [clientes, total] = await ClienteRepository.findAndCount({
       where: whereConditions,
       skip: startIndex,
-      take: limit
+      take: limit,
+      select: ["id", "nombreCliente", "tipoIdentificacion", "numeroIdentificacion", "observaciones"]
     });
 
     res.status(200).json({ data: clientes, total });

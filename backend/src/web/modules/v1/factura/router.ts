@@ -3,13 +3,15 @@ import {
   deleteFactura,
   getFactura,
   getFacturas,
-  updateFactura
+  updateFactura,
+  getFacturasPagination
 } from "@/web/modules/v1/factura/controller/factura";
 import express from "express";
 
 const router = express.Router();
 
 router.get("/", getFacturas);
+router.get("/paginacion", getFacturasPagination);
 router.post("/", createFactura);
 router.get("/:id", getFactura);
 router.put("/:id", updateFactura);
