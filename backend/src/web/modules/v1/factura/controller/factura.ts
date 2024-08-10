@@ -24,6 +24,12 @@ const createFactura = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Validación de valor de descuento
+    if (valorDescuento !== undefined && (valorDescuento < 0 || valorDescuento > 50)) {
+      res.status(400).json({ message: "El valor del descuento debe estar entre 0 y 50" });
+      return;
+    }
+
     // Formatear la fecha a un formato aceptable por MySQL
     const formattedDate = new Date(fecha).toISOString().slice(0, 19).replace("T", " ");
 
@@ -56,88 +62,98 @@ const createFactura = async (req: Request, res: Response): Promise<void> => {
 const getFacturas = async (req: Request, res: Response): Promise<void> => {
   try {
     const facturas = await FacturaRepository.find({ relations: ["cliente"] });
-    res.json(facturas);
+    res.status(200).json(facturas);
   } catch (error) {
     console.error("Error al obtener las facturas:", error);
     res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
+/**
+ * Obtiene la lista de todas las facturas con paginación y filtros opcionales.
+ *
+ * @param req - La solicitud HTTP.
+ * @param res - La respuesta HTTP.
+ */
 const getFacturasPagination = async (req: Request, res: Response): Promise<void> => {
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const idFilter = req.query.id as string;
-  const startDateFilter = req.query.startDate as string;
-  const endDateFilter = req.query.endDate as string;
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const idFilter = req.query.id as string;
+    const startDateFilter = req.query.startDate as string;
+    const endDateFilter = req.query.endDate as string;
 
-  const startIndex = (page - 1) * limit;
+    const startIndex = (page - 1) * limit;
 
-  const whereConditions: any = [];
+    const whereConditions: any = [];
 
-  // Helper function to convert DD/MM/YYYY to YYYY-MM-DD
-  const convertToISODate = (dateString: string): string => {
-    const [day, month, year] = dateString.split("/");
-    return `${year}-${month}-${day}`;
-  };
-
-  // Agregar filtros de fecha si se proporcionan
-  if (startDateFilter && endDateFilter) {
-    whereConditions.push({
-      fecha: Between(
-        new Date(convertToISODate(startDateFilter)),
-        new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
-      )
-    });
-  } else if (startDateFilter) {
-    whereConditions.push({
-      fecha: MoreThanOrEqual(new Date(convertToISODate(startDateFilter)))
-    });
-  } else if (endDateFilter) {
-    whereConditions.push({
-      fecha: LessThanOrEqual(
-        new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
-      )
-    });
-  }
-
-  // Agregar filtro de ID si se proporciona
-  if (idFilter) {
-    whereConditions.push({
-      cliente: { id: idFilter }
-    });
-  }
-
-  const [clientes, total] = await FacturaRepository.findAndCount({
-    where: whereConditions,
-    skip: startIndex,
-    take: limit,
-    relations: ["cliente"],
-    select: [
-      "id",
-      "nombreProducto",
-      "precio",
-      "cliente",
-      "fecha",
-      "valorDescuento",
-      "iva",
-      "valorTotal"
-    ]
-  });
-
-  const clientsFormat = clientes.map((client) => {
-    return {
-      id: client.id,
-      nombreProducto: client.nombreProducto,
-      precio: client.precio,
-      cliente: client.cliente.nombreCliente,
-      fecha: client.fecha,
-      valorDescuento: client.valorDescuento,
-      iva: client.iva,
-      valorTotal: client.valorTotal
+    // Helper function to convertir DD/MM/YYYY a YYYY-MM-DD
+    const convertToISODate = (dateString: string): string => {
+      const [day, month, year] = dateString.split("/");
+      return `${year}-${month}-${day}`;
     };
-  });
 
-  res.status(200).json({ data: clientsFormat, total });
+    // Agregar filtros de fecha si se proporcionan
+    if (startDateFilter && endDateFilter) {
+      whereConditions.push({
+        fecha: Between(
+          new Date(convertToISODate(startDateFilter)),
+          new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
+        )
+      });
+    } else if (startDateFilter) {
+      whereConditions.push({
+        fecha: MoreThanOrEqual(new Date(convertToISODate(startDateFilter)))
+      });
+    } else if (endDateFilter) {
+      whereConditions.push({
+        fecha: LessThanOrEqual(
+          new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
+        )
+      });
+    }
+
+    // Agregar filtro de ID si se proporciona
+    if (idFilter) {
+      whereConditions.push({
+        cliente: { id: idFilter }
+      });
+    }
+
+    const [facturas, total] = await FacturaRepository.findAndCount({
+      where: whereConditions,
+      skip: startIndex,
+      take: limit,
+      relations: ["cliente"],
+      select: [
+        "id",
+        "nombreProducto",
+        "precio",
+        "cliente",
+        "fecha",
+        "valorDescuento",
+        "iva",
+        "valorTotal"
+      ]
+    });
+
+    // Formatear los datos para la respuesta
+    const formattedFacturas = facturas.map((factura) => ({
+      id: factura.id,
+      nombreProducto: factura.nombreProducto,
+      precio: factura.precio,
+      cliente: factura.cliente.nombreCliente,
+      fecha: factura.fecha,
+      valorDescuento: factura.valorDescuento,
+      iva: factura.iva,
+      valorTotal: factura.valorTotal
+    }));
+
+    res.status(200).json({ data: formattedFacturas, total });
+  } catch (error) {
+    console.error("Error al obtener las facturas:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
 };
 
 /**
@@ -149,6 +165,7 @@ const getFacturasPagination = async (req: Request, res: Response): Promise<void>
 const getFactura = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+
     if (!id) {
       res.status(400).json({ message: "Falta el ID de la factura" });
       return;
@@ -208,6 +225,12 @@ const updateFactura = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Validación de valor de descuento
+    if (valorDescuento !== undefined && (valorDescuento < 0 || valorDescuento > 50)) {
+      res.status(400).json({ message: "El valor del descuento debe estar entre 0 y 50" });
+      return;
+    }
+
     // Búsqueda de la factura
     const factura = await FacturaRepository.findOne({
       where: { id }
@@ -218,15 +241,8 @@ const updateFactura = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const client = await ClienteRepository.findOne({ where: { id: clienteId } });
-
-    if (!client) {
-      res.status(404).json({ message: "Cliente no encontrado" });
-      return;
-    }
-
     // Actualización de la factura
-    factura.cliente = client || factura.cliente;
+    factura.cliente = clienteId ? await ClienteRepository.findOne({ where: { id: clienteId } }) || factura.cliente : factura.cliente;
     factura.fecha = fecha || factura.fecha;
     factura.nombreProducto = nombreProducto || factura.nombreProducto;
     factura.precio = precio || factura.precio;
@@ -265,6 +281,7 @@ const deleteFactura = async (req: Request, res: Response): Promise<void> => {
 
     if (!factura) {
       res.status(404).json({ message: "Factura no encontrada" });
+      return;
     }
 
     // Eliminación de la factura

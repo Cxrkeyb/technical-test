@@ -35,7 +35,7 @@ const validationSchema = yup.object().shape({
   valorDescuento: yup
     .number()
     .min(0, 'El descuento no puede ser negativo')
-    .max(100, 'El valor del descuento no puede ser mayor al 50%')
+    .max(50, 'El valor del descuento no puede ser mayor al 50%')
     .nullable(),
   iva: yup
     .number()
