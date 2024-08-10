@@ -1,5 +1,6 @@
 import { ClienteRepository } from "@/databases/mysql/repos";
 import { Request, Response } from "express";
+import { Between, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 
 /**
  * Crea un nuevo cliente.
@@ -77,6 +78,68 @@ const getClientes = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: "Error interno del servidor" });
   }
 };
+
+/**
+* Obtiene la lista de todos los clientes con paginación.
+* @param req - La solicitud HTTP.
+* @param res - La respuesta HTTP. 
+*/
+const getClientesPaginacion = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const idFilter = req.query.id as string;
+    const startDateFilter = req.query.startDate as string;
+    const endDateFilter = req.query.endDate as string;
+
+    const startIndex = (page - 1) * limit;
+
+    const whereConditions: any = [];
+
+    // Helper function to convert DD/MM/YYYY to YYYY-MM-DD
+    const convertToISODate = (dateString: string): string => {
+      const [day, month, year] = dateString.split("/");
+      return `${year}-${month}-${day}`;
+    };
+
+    // Agregar filtros de fecha si se proporcionan
+    if (startDateFilter && endDateFilter) {
+      whereConditions.push({
+        created_at: Between(
+          new Date(convertToISODate(startDateFilter)),
+          new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
+        )
+      });
+    } else if (startDateFilter) {
+      whereConditions.push({
+        created_at: MoreThanOrEqual(new Date(convertToISODate(startDateFilter)))
+      });
+    } else if (endDateFilter) {
+      whereConditions.push({
+        created_at: LessThanOrEqual(
+          new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
+        )
+      });
+    }
+
+    // Agregar filtro de ID si se proporciona
+    if (idFilter) {
+      whereConditions.push({ id: idFilter });
+    }
+
+    const [clientes, total] = await ClienteRepository.findAndCount({
+      where: whereConditions,
+      skip: startIndex,
+      take: limit
+    });
+
+    res.status(200).json({ data: clientes, total });
+
+  } catch (error) {
+    console.error("Error al obtener los clientes:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+}
 
 /**
  * Obtiene un cliente por su ID.
@@ -210,4 +273,4 @@ const deleteCliente = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { createCliente, getClientes, getCliente, updateCliente, deleteCliente };
+export { createCliente, getClientes, getCliente, updateCliente, deleteCliente, getClientesPaginacion };
