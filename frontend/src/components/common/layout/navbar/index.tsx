@@ -8,30 +8,30 @@ function NavbarPrincipal() {
 
   return (
     <div className="bg-black pb-1">
-      <div className="flex flex-row container items-end w-full justify-between">
+      <div className="flex flex-col md:flex-row container items-center md:items-end w-full justify-between">
         <Logo />
-        <div className="flex flex-row">
-          <div className="flex flex-row gap-8 pb-1">
+        <div className="flex flex-col md:flex-row">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-8 pb-1">
             <Link
-              className={`text-white text-lg relative ${
+              className={`text-white text-base relative ${
                 router.pathname === '/' ? 'font-bold text-primary' : ''
               }`}
               href="/"
             >
               Clientes
               {router.pathname === '/' && (
-                <div className="w-full h-1 bg-primary rounded-full absolute -bottom-[9px]" />
+                <div className="w-full h-1 bg-primary rounded-full absolute -bottom-[3px] md:-bottom-[9px]" />
               )}
             </Link>
             <Link
-              className={`text-white text-lg relative ${
+              className={`text-white text-base relative ${
                 router.pathname === '/facturas' ? 'font-bold text-primary' : ''
               }`}
               href="/facturas"
             >
               Facturas
               {router.pathname === '/facturas' && (
-                <div className="w-full h-1 bg-primary rounded-full absolute -bottom-[9px]" />
+                <div className="w-full h-1 bg-primary rounded-full absolute -bottom-[3px] md:-bottom-[9px]" />
               )}
             </Link>
           </div>
