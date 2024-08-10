@@ -13,6 +13,10 @@
    }
 }
 
+.css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline{
+  border-color: black;
+}
+
 @layer base {
   body {
     @apply bg-primary-background text-black;
