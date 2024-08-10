@@ -97,6 +97,7 @@ El backend se ejecuta en un entorno Docker y utiliza TypeORM para la gestión de
 
 1. Ejecuta `docker-compose up -d` para iniciar los servicios de Docker.
 2. Ejecuta `npm run run-migrations` para ejecutar las migraciones de la base de datos.
+3. Ejecuta `npm run dev` para ejecutar el proyecto.
 
 ### Scripts
 
