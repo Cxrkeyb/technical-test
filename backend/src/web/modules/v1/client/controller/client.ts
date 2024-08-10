@@ -64,7 +64,14 @@ const createCliente = async (req: Request, res: Response): Promise<void> => {
 const getClientes = async (req: Request, res: Response): Promise<void> => {
   try {
     const clientes = await ClienteRepository.find();
-    res.json(clientes);
+
+    const resClients = clientes.map((cliente) => {
+      return {
+        value: cliente.id,
+        label: cliente.nombreCliente
+      };
+    });
+    res.status(200).json(resClients);
   } catch (error) {
     console.error("Error al obtener los clientes:", error);
     res.status(500).json({ message: "Error interno del servidor" });
