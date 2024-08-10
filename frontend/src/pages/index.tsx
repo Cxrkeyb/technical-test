@@ -4,7 +4,7 @@ import HomeView from '@/views/home';
 export default function Home() {
   return (
     <>
-      <Head title="Inicio" />
+      <Head title="Clientes" />
       <HomeView />
     </>
   );
