@@ -23,10 +23,13 @@ const createFactura = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Formatear la fecha a un formato aceptable por MySQL
+    const formattedDate = new Date(fecha).toISOString().slice(0, 19).replace("T", " ");
+
     // Creación de la factura
     const factura = FacturaRepository.create({
       cliente: { id: clienteId },
-      fecha,
+      fecha: formattedDate,
       nombreProducto,
       precio,
       valorDescuento: valorDescuento || 0,
