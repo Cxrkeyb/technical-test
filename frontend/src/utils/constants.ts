@@ -5,4 +5,10 @@ enum FieldTypes {
   number = 'number',
 }
 
+interface TableRow {
+  [key: string]: string;
+}
+
 export { FieldTypes };
+
+export type { TableRow };
