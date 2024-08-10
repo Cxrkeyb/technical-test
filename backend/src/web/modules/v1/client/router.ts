@@ -3,13 +3,15 @@ import {
   deleteCliente,
   getCliente,
   getClientes,
-  updateCliente
+  updateCliente,
+  getClientesPaginacion
 } from "@/web/modules/v1/client/controller/client";
 import express from "express";
 
 const router = express.Router();
 
 router.get("/", getClientes);
+router.get("/paginacion", getClientesPaginacion);
 router.post("/", createCliente);
 router.get("/:id", getCliente);
 router.put("/:id", updateCliente);
