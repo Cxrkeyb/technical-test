@@ -80,10 +80,10 @@ const getClientes = async (req: Request, res: Response): Promise<void> => {
 };
 
 /**
-* Obtiene la lista de todos los clientes con paginación.
-* @param req - La solicitud HTTP.
-* @param res - La respuesta HTTP. 
-*/
+ * Obtiene la lista de todos los clientes con paginación.
+ * @param req - La solicitud HTTP.
+ * @param res - La respuesta HTTP.
+ */
 const getClientesPaginacion = async (req: Request, res: Response): Promise<void> => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -105,18 +105,18 @@ const getClientesPaginacion = async (req: Request, res: Response): Promise<void>
     // Agregar filtros de fecha si se proporcionan
     if (startDateFilter && endDateFilter) {
       whereConditions.push({
-        created_at: Between(
+        fecha: Between(
           new Date(convertToISODate(startDateFilter)),
           new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
         )
       });
     } else if (startDateFilter) {
       whereConditions.push({
-        created_at: MoreThanOrEqual(new Date(convertToISODate(startDateFilter)))
+        fecha: MoreThanOrEqual(new Date(convertToISODate(startDateFilter)))
       });
     } else if (endDateFilter) {
       whereConditions.push({
-        created_at: LessThanOrEqual(
+        fecha: LessThanOrEqual(
           new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
         )
       });
@@ -127,6 +127,8 @@ const getClientesPaginacion = async (req: Request, res: Response): Promise<void>
       whereConditions.push({ id: idFilter });
     }
 
+    console.log("whereConditions", whereConditions);
+
     const [clientes, total] = await ClienteRepository.findAndCount({
       where: whereConditions,
       skip: startIndex,
@@ -135,12 +137,11 @@ const getClientesPaginacion = async (req: Request, res: Response): Promise<void>
     });
 
     res.status(200).json({ data: clientes, total });
-
   } catch (error) {
     console.error("Error al obtener los clientes:", error);
     res.status(500).json({ message: "Error interno del servidor" });
   }
-}
+};
 
 /**
  * Obtiene un cliente por su ID.
@@ -274,4 +275,11 @@ const deleteCliente = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { createCliente, getClientes, getCliente, updateCliente, deleteCliente, getClientesPaginacion };
+export {
+  createCliente,
+  getClientes,
+  getCliente,
+  updateCliente,
+  deleteCliente,
+  getClientesPaginacion
+};

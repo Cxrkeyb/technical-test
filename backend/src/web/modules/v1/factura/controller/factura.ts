@@ -65,54 +65,79 @@ const getFacturas = async (req: Request, res: Response): Promise<void> => {
 
 const getFacturasPagination = async (req: Request, res: Response): Promise<void> => {
   const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const idFilter = req.query.id as string;
-    const startDateFilter = req.query.startDate as string;
-    const endDateFilter = req.query.endDate as string;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const idFilter = req.query.id as string;
+  const startDateFilter = req.query.startDate as string;
+  const endDateFilter = req.query.endDate as string;
 
-    const startIndex = (page - 1) * limit;
+  const startIndex = (page - 1) * limit;
 
-    const whereConditions: any = [];
+  const whereConditions: any = [];
 
-    // Helper function to convert DD/MM/YYYY to YYYY-MM-DD
-    const convertToISODate = (dateString: string): string => {
-      const [day, month, year] = dateString.split("/");
-      return `${year}-${month}-${day}`;
-    };
+  // Helper function to convert DD/MM/YYYY to YYYY-MM-DD
+  const convertToISODate = (dateString: string): string => {
+    const [day, month, year] = dateString.split("/");
+    return `${year}-${month}-${day}`;
+  };
 
-    // Agregar filtros de fecha si se proporcionan
-    if (startDateFilter && endDateFilter) {
-      whereConditions.push({
-        created_at: Between(
-          new Date(convertToISODate(startDateFilter)),
-          new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
-        )
-      });
-    } else if (startDateFilter) {
-      whereConditions.push({
-        created_at: MoreThanOrEqual(new Date(convertToISODate(startDateFilter)))
-      });
-    } else if (endDateFilter) {
-      whereConditions.push({
-        created_at: LessThanOrEqual(
-          new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
-        )
-      });
-    }
-
-    // Agregar filtro de ID si se proporciona
-    if (idFilter) {
-      whereConditions.push({ id: idFilter });
-    }
-
-    const [clientes, total] = await FacturaRepository.findAndCount({
-      where: whereConditions,
-      skip: startIndex,
-      take: limit,
-      select: ["id", "nombreProducto", "precio", "valorDescuento", "iva", "valorTotal"]
+  // Agregar filtros de fecha si se proporcionan
+  if (startDateFilter && endDateFilter) {
+    whereConditions.push({
+      fecha: Between(
+        new Date(convertToISODate(startDateFilter)),
+        new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
+      )
     });
+  } else if (startDateFilter) {
+    whereConditions.push({
+      fecha: MoreThanOrEqual(new Date(convertToISODate(startDateFilter)))
+    });
+  } else if (endDateFilter) {
+    whereConditions.push({
+      fecha: LessThanOrEqual(
+        new Date(new Date(convertToISODate(endDateFilter)).setHours(23, 59, 59, 999))
+      )
+    });
+  }
 
-    res.status(200).json({ data: clientes, total });
+  // Agregar filtro de ID si se proporciona
+  if (idFilter) {
+    whereConditions.push({
+      cliente: { id: idFilter }
+    });
+  }
+
+  const [clientes, total] = await FacturaRepository.findAndCount({
+    where: whereConditions,
+    skip: startIndex,
+    take: limit,
+    relations: ["cliente"],
+    select: [
+      "id",
+      "nombreProducto",
+      "precio",
+      "cliente",
+      "fecha",
+      "valorDescuento",
+      "iva",
+      "valorTotal"
+    ]
+  });
+
+  const clientsFormat = clientes.map((client) => {
+    return {
+      id: client.id,
+      nombreProducto: client.nombreProducto,
+      precio: client.precio,
+      cliente: client.cliente.nombreCliente,
+      fecha: client.fecha,
+      valorDescuento: client.valorDescuento,
+      iva: client.iva,
+      valorTotal: client.valorTotal
+    };
+  });
+
+  res.status(200).json({ data: clientsFormat, total });
 };
 
 /**
@@ -252,4 +277,11 @@ const deleteFactura = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { createFactura, getFacturas, getFactura, updateFactura, deleteFactura, getFacturasPagination };
+export {
+  createFactura,
+  getFacturas,
+  getFactura,
+  updateFactura,
+  deleteFactura,
+  getFacturasPagination
+};
