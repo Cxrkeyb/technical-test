@@ -7,8 +7,8 @@
     "outDir": "./dist",
     "paths": {
       "@/*": ["*"],
-      "@entities/*": ["databases/postgresql/entities/*"],
-      "@repositories/*": ["databases/postgresql/repos/*"]
+      "@entities/*": ["databases/mysql/entities/*"],
+      "@repositories/*": ["databases/mysql/repos/*"]
     },
     "typeRoots": ["./node_modules/@types", "./src/@types"],
     "sourceMap": true,
