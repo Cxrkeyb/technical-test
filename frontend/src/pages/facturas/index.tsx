@@ -1,11 +1,11 @@
 import { Head } from '@/components';
-import HomeView from '@/views/home';
+import FacturaView from '@/views/facturas';
 
 export default function Home() {
   return (
     <>
-      <Head title="Clientes" />
-      <HomeView />
+      <Head title="Facturas" />
+      <FacturaView />
     </>
   );
 }

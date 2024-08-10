@@ -11,14 +11,14 @@ const options: DataSourceOptions = {
   maxQueryExecutionTime: 1000,
   entities: models,
   migrations: config.env.isMigrationEnv
-    ? ["src/databases/postgresql/migrations/*.ts"]
-    : ["dist/databases/postgresql/migrations/*.js"],
+    ? ["src/databases/mysql/migrations/*.ts"]
+    : ["dist/databases/mysql/migrations/*.js"],
   extra: {
     connectionLimit: 10
   },
   // @ts-expect-error Check types
   cli: {
-    migrationsDir: "./src/databases/postgresql/migrations/"
+    migrationsDir: "./src/databases/mysql/migrations/"
   }
 };
 

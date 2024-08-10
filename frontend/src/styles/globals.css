@@ -4,12 +4,21 @@
  
 @layer base {
   :root {
-    --primary: 	306, 80%, 40%;
-    --primary-background: 306, 80%, 80%;
-    --primary-foreground: 306, 80%, 70%;
+    --primary: 	258, 100%, 87%;
+    --primary-background: 293, 100%, 98%;
+    --primary-foreground: 256, 100%, 96%;
  
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
    }
+}
 
+.css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline{
+  border-color: black;
+}
+
+@layer base {
+  body {
+    @apply bg-primary-background text-black;
+  }
 }

@@ -8,28 +8,23 @@ import BasicDatePicker from '@/components/common/material-ui/BasicDatePicker';
 import BasicTable from '@/components/common/table/BasicTable';
 import PageEnumeration from '@/components/common/table/PageEnumeration';
 import { FieldTypes } from '@/utils/constants';
-import useClientsPagination from '@/views/home/hooks/useClientsPagination';
-import useNewClientForm from '@/views/home/hooks/useNewClientForm';
+import useBillsPagination from '@/views/facturas/hooks/useBillsPagination';
+import useNewBillForm from '@/views/facturas/hooks/useNewBillForm';
 
-export default function HomeView() {
+export default function FacturaView() {
+  const { error, formik, loading, clients } = useNewBillForm();
   const {
-    error,
-    formik: formikNewClient,
-    loading: loadingNewClient,
-  } = useNewClientForm();
-  const {
-    clients,
+    bills,
     clearFilters,
     totalPages,
-    formik: formikClients,
-    createClient,
-    setCreateClient,
-    loading: loadingClients,
-  } = useClientsPagination();
+    formik: formikBills,
+    createBill,
+    setCreateBill,
+  } = useBillsPagination();
 
   return (
     <>
-      {(loadingNewClient || loadingClients) && (
+      {loading && (
         <div className="flex items-center justify-center w-full h-full fixed top-0 left-0 bg-gray-600 bg-opacity-50 z-50">
           <div className="bg-white p-4 rounded-lg shadow-lg">
             <p className="text-lg font-semibold">Cargando...</p>
@@ -39,67 +34,78 @@ export default function HomeView() {
       <div className="flex flex-col w-full items-center justify-center px-4 sm:px-6 lg:px-8">
         <div
           className={`flex flex-col gap-8 w-full ${
-            createClient ? 'max-w-4xl' : 'max-w-7xl'
+            createBill ? 'max-w-4xl' : 'max-w-7xl'
           } border shadow-xl container rounded-xl bg-white p-4 sm:p-6 lg:p-10 xl:p-16 relative my-16`}
         >
           <div className="flex flex-row justify-between items-center gap-4 w-full">
-            <h1 className="text-xl sm:text-2xl font-bold">Clientes</h1>
+            <h1 className="text-xl sm:text-2xl font-bold">Facturas</h1>
             <button
-              onClick={() => setCreateClient(!createClient)}
+              onClick={() => setCreateBill(!createBill)}
               className="bg-primary text-black rounded-full font-semibold py-2 px-4 hover:text-gray-500 transition-all duration-300 hover:scale-105 transform"
             >
-              {createClient ? 'Ver clientes' : 'Crear cliente'}
+              {createBill ? 'Ver facturas' : 'Crear factura'}
             </button>
           </div>
-          {createClient ? (
+          {createBill ? (
             <>
               <div className="bg-primary-foreground w-full p-3 text-black font-semibold text-center sm:text-left">
                 Rellena la siguiente información
               </div>
 
-              <FormikProvider value={formikNewClient}>
-                <Form className="grid grid-cols-1 lg:grid-cols-6 gap-4 sm:gap-6 lg:gap-8 w-full">
-                  <div className="col-span-1 lg:col-span-4">
-                    <InputField
-                      name="nombreCliente"
-                      placeholder="Nombre del cliente"
+              <FormikProvider value={formik}>
+                <Form className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12 lg:gap-8 w-full">
+                  <div className="col-span-1 lg:col-span-6">
+                    <SelectField
+                      name="clienteId"
+                      label="Cliente"
+                      options={clients}
                     />
                   </div>
-                  <div className="col-span-1 lg:col-span-2 lg:col-start-1">
-                    <SelectField
-                      options={[
-                        { value: 'CC', label: 'Cédula de ciudadanía' },
-                        { value: 'CE', label: 'Cédula de extranjería' },
-                        { value: 'NIT', label: 'NIT' },
-                        { value: 'TI', label: 'Tarjeta de identidad' },
-                        { value: 'PP', label: 'Pasaporte' },
-                      ]}
-                      name="tipoIdentificacion"
-                      label="Tipo de identificación"
+                  <div className="col-span-1 lg:col-span-4">
+                    <BasicDatePicker name="fecha" label="Fecha de la factura" />
+                  </div>
+                  <div className="col-span-1 lg:col-span-5">
+                    <InputField
+                      name="nombreProducto"
+                      placeholder="Nombre del producto"
+                      type={FieldTypes.text}
                     />
                   </div>
                   <div className="col-span-1 lg:col-span-3">
                     <InputField
-                      name="numeroIdentificacion"
+                      name="precio"
+                      placeholder="Precio"
                       type={FieldTypes.number}
-                      placeholder="Número de identificación"
                     />
                   </div>
-                  <div className="col-span-1 lg:col-span-6">
+                  <div className="col-span-1 lg:col-span-4 lg:col-start-1">
                     <InputField
-                      name="observaciones"
-                      placeholder="Observaciones"
-                      type={FieldTypes.text}
-                      rows={3}
+                      name="valorDescuento"
+                      placeholder="Valor de descuento"
+                      type={FieldTypes.number}
                     />
                   </div>
-                  <div className="col-span-1 lg:col-span-6">
-                    <div className="flex flex-row justify-end gap-4">
+                  <div className="col-span-1 lg:col-span-3">
+                    <InputField
+                      name="iva"
+                      placeholder="IVA"
+                      disabled
+                      type={FieldTypes.number}
+                    />
+                  </div>
+                  <div className="col-span-1 lg:col-span-12">
+                    <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+                      <div className="flex flex-row gap-2 rounded-lg p-4">
+                        <p className="text-lg font-semibold">
+                          Valor total de la factura:
+                        </p>
+                        <p className="text-lg">{formik.values.valorTotal}</p>
+                      </div>
                       <button
                         className="bg-primary text-black rounded-full font-semibold py-2 px-4 hover:text-gray-500 transition-all duration-300 hover:scale-105 transform"
                         type="submit"
                       >
-                        Guardar cliente
+                        Enviar factura
                       </button>
                     </div>
                   </div>
@@ -114,13 +120,14 @@ export default function HomeView() {
             </>
           ) : (
             <div className="flex flex-col w-full gap-8">
-              <FormikProvider value={formikClients}>
+              <FormikProvider value={formikBills}>
                 <div className="flex flex-col gap-8">
+                  {/* Filtros y botón para limpiar filtros */}
                   <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 sm:flex-wrap w-full mb-4">
                       <div className="w-full sm:max-w-[400px]">
                         <InputField
-                          placeholder="Buscar por ID"
+                          placeholder="Buscar por id de cliente"
                           name="id"
                           icon={<FaSearch className="text-gray-400" />}
                         />
@@ -130,10 +137,10 @@ export default function HomeView() {
                           label="Fecha de inicio"
                           name="startDate"
                           maxDate={
-                            formikClients.values.endDate
-                              ? typeof formikClients.values.endDate === 'string'
-                                ? new Date(formikClients.values.endDate)
-                                : formikClients.values.endDate
+                            formikBills.values.endDate
+                              ? typeof formikBills.values.endDate === 'string'
+                                ? new Date(formikBills.values.endDate)
+                                : formikBills.values.endDate
                               : undefined
                           }
                         />
@@ -147,9 +154,9 @@ export default function HomeView() {
                       </div>
                       <button
                         type="button"
-                        className="w-full sm:w-auto sm:max-w-[200px] mt-4 sm:mt-0 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                        className="w-full sm:max-w-[200px] mt-4 sm:mt-0 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
                         onClick={() => {
-                          formikClients.resetForm();
+                          formikBills.resetForm();
                           clearFilters();
                         }}
                       >
@@ -163,12 +170,15 @@ export default function HomeView() {
                     <BasicTable
                       headers={[
                         'ID',
-                        'Nombre Cliente',
-                        'Tipo Identificación',
-                        'Número Identificación',
-                        'Observaciones',
+                        'Nombre producto',
+                        'Precio producto',
+                        'Nombre cliente',
+                        'Fecha factura',
+                        'Porcentaje descuento',
+                        'Porcentaje IVA',
+                        'Total factura',
                       ]}
-                      rows={clients}
+                      rows={bills}
                     />
                   </div>
                   <PageEnumeration totalPages={totalPages} />
