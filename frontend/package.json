@@ -8,11 +8,15 @@
     "start": "next start"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@mui/x-date-pickers": "^7.12.1",
     "accept-language": "^3.0.18",
     "axios": "^1.6.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^0.2.0",
+    "dayjs": "^1.11.12",
     "formik": "^2.4.6",
     "geist": "^1.2.1",
     "isomorphic-unfetch": "^4.0.2",
