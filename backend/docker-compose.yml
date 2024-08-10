@@ -1,0 +1,28 @@
+version: "3.8" # Versión de Docker Compose que se utilizará.
+
+services:
+  db: # Definición del servicio de la base de datos MySQL.
+    image: mysql:latest # Imagen de Docker utilizada para crear el contenedor, en este caso, la última versión de MySQL.
+    restart: always # Configuración para reiniciar el contenedor siempre que Docker o el sistema operativo se reinicien.
+    environment:
+      - MYSQL_ROOT_PASSWORD=wilsonparada # Contraseña del usuario root de la base de datos MySQL.
+      - MYSQL_DATABASE=mydatabase # Nombre de la base de datos predeterminada que se creará.
+      - MYSQL_USER=wilson # Nombre de usuario para la base de datos MySQL.
+      - MYSQL_PASSWORD=wilsonparada # Contraseña del usuario de la base de datos MySQL.
+    ports:
+      - "3306:3306" # Mapeo del puerto 3306 del contenedor al puerto 3306 del host.
+    volumes:
+      - db:/var/lib/mysql # Montaje de un volumen para persistir los datos de la base de datos en el directorio /var/lib/mysql dentro del contenedor.
+
+  adminer: # Definición del servicio Adminer (alternativa a phpMyAdmin).
+    image: adminer # Imagen de Docker utilizada para crear el contenedor, que es la imagen oficial de Adminer.
+    restart: always # Configuración para reiniciar el contenedor siempre que Docker o el sistema operativo se reinicien.
+    ports:
+      - "8080:8080" # Mapeo del puerto 8080 del contenedor al puerto 8080 del host.
+
+volumes:
+  db: # Definición de un volumen llamado "db".
+    driver: local # Tipo de driver de volumen local.
+
+  cache: # Definición de un volumen llamado "cache".
+    driver: local # Tipo de driver de volumen local.
