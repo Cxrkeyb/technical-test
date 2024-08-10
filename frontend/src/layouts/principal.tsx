@@ -1,6 +1,6 @@
 'use client';
 
-import { Assistant } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import * as React from 'react';
 
 import NavbarPrincipal from '@/components/common/layout/navbar';
@@ -10,7 +10,7 @@ interface Props {
   className?: string;
 }
 
-const righteous = Assistant({
+const righteous = Inter({
   weight: ['400', '500', '600', '700'],
   style: ['normal'],
   subsets: ['latin'],
